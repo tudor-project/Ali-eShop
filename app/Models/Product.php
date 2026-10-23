@@ -57,4 +57,13 @@ class Product extends Model
             ->withPivot('sort_order')
             ->withTimestamps();
     }
+
+    protected static function booted(): void
+    {
+        static::forceDeleting(function (Product $product): void {
+            $product->images()->get()->each(function (ProductImage $image): void {
+                $image->delete();
+            });
+        });
+    }
 }

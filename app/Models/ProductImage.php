@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'product_id',
@@ -35,5 +36,16 @@ class ProductImage extends Model
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (ProductImage $image): void {
+            if (blank($image->path)) {
+                return;
+            }
+
+            Storage::disk($image->disk ?: 'public')->delete($image->path);
+        });
     }
 }
