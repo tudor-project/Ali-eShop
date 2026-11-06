@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'product_id',
+    'info_popup_id',
     'code',
     'min_selections',
     'max_selections',
@@ -30,6 +31,11 @@ class ProductOptionGroup extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function infoPopup(): BelongsTo
+    {
+        return $this->belongsTo(InfoPopup::class);
     }
 
     public function translations(): HasMany

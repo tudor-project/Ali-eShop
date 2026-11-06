@@ -99,25 +99,6 @@ class ProductInfolist
                                     ->label(__('admin.products.fields.sort_order')),
                             ]),
                     ]),
-                Section::make(__('admin.products.sections.info_popups'))
-                    ->columnSpanFull()
-                    ->schema([
-                        RepeatableEntry::make('infoPopupAssignments')
-                            ->label(__('admin.products.sections.info_popups'))
-                            ->columns(2)
-                            ->getConstantStateUsing(fn (Product $record): array => $record->infoPopups
-                                ->map(fn (InfoPopup $popup): array => [
-                                    'title' => ProductAdmin::nameFromTranslations($popup->translations, 'title'),
-                                    'sort_order' => $popup->pivot?->sort_order,
-                                ])
-                                ->all())
-                            ->schema([
-                                TextEntry::make('title')
-                                    ->label(__('admin.products.fields.info_popup')),
-                                TextEntry::make('sort_order')
-                                    ->label(__('admin.products.fields.sort_order')),
-                            ]),
-                    ]),
                 Section::make(__('admin.products.sections.options'))
                     ->columnSpanFull()
                     ->schema([
@@ -139,6 +120,9 @@ class ProductInfolist
                                 TextEntry::make('name')
                                     ->label(__('admin.products.fields.name'))
                                     ->getConstantStateUsing(fn (ProductOptionGroup $record): string => ProductAdmin::nameFromTranslations($record->translations)),
+                                TextEntry::make('info_popup')
+                                    ->label(__('admin.products.fields.info_popup'))
+                                    ->getConstantStateUsing(fn (ProductOptionGroup $record): string => ProductAdmin::nameFromTranslations($record->infoPopup?->translations ?? [], 'title')),
                                 RepeatableEntry::make('values')
                                     ->label(__('admin.products.sections.option_values'))
                                     ->columnSpanFull()

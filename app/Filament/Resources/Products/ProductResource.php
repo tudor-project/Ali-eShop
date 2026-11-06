@@ -106,6 +106,7 @@ class ProductResource extends Resource
                 'categories.translations',
                 'infoPopups.translations',
                 'optionGroups.translations',
+                'optionGroups.infoPopup.translations',
                 'optionGroups.values.translations',
                 'variants.variantOptionValues.optionValue.translations',
                 'variants.variantOptionValues.optionValue.optionGroup.translations',

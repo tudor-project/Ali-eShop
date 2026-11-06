@@ -36,7 +36,6 @@ class ProductForm
                 self::generalSection(),
                 self::translationsSection(),
                 self::categoriesSection(),
-                self::infoPopupsSection(),
                 self::optionGroupsSection(),
                 self::variantsSection(),
                 self::imagesSection(),
@@ -140,7 +139,7 @@ class ProductForm
     private static function categoriesSection(): Section
     {
         return Section::make(__('admin.products.sections.categories'))
-            // ->columnSpanFull()
+            ->columnSpanFull()
             ->schema([
                 Repeater::make('categoryAssignments')
                     ->label(__('admin.products.sections.categories'))
@@ -154,38 +153,6 @@ class ProductForm
                         Select::make('category_id')
                             ->label(__('admin.products.fields.category'))
                             ->options(fn (): array => self::categoryOptions())
-                            ->searchable()
-                            ->required()
-                            ->distinct()
-                            ->native(false),
-                        TextInput::make('sort_order')
-                            ->label(__('admin.products.fields.sort_order'))
-                            ->integer()
-                            ->minValue(0)
-                            ->default(0)
-                            ->required(),
-                    ]),
-            ]);
-    }
-
-
-    private static function infoPopupsSection(): Section
-    {
-        return Section::make(__('admin.products.sections.info_popups'))
-            // ->columnSpanFull()
-            ->schema([
-                Repeater::make('infoPopupAssignments')
-                    ->label(__('admin.products.sections.info_popups'))
-                    ->addActionLabel(__('admin.products.actions.add_info_popup'))
-                    ->defaultItems(0)
-                    ->dehydrated(false)
-                    ->reorderable(false)
-                    ->collapsible()
-                    ->columns(2)
-                    ->schema([
-                        Select::make('info_popup_id')
-                            ->label(__('admin.products.fields.info_popup'))
-                            ->options(fn (): array => self::infoPopupOptions())
                             ->searchable()
                             ->required()
                             ->distinct()
@@ -241,6 +208,13 @@ class ProductForm
                             ->maxValue(255)
                             ->default(1)
                             ->required(),
+                        Select::make('info_popup_id')
+                            ->label(__('admin.products.fields.info_popup'))
+                            ->options(fn (): array => self::infoPopupOptions())
+                            ->searchable()
+                            ->native(false)
+                            ->columnSpanFull()
+                            ->dehydrateStateUsing(fn ($state) => filled($state) ? (int) $state : null),
                         Repeater::make('translations')
                             ->relationship()
                             ->label(__('admin.products.sections.translations'))
