@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['key', 'video_url', 'is_active'])]
+#[Fillable(['key', 'is_active'])]
 class InfoPopup extends Model
 {
     /**

@@ -31,10 +31,6 @@ return new class extends Migration
             $table->index(['status', 'created_at']);
         });
 
-        Schema::table('inventory_movements', function (Blueprint $table) {
-            $table->foreign('order_id')->references('id')->on('orders')->nullOnDelete();
-        });
-
         Schema::create('order_contacts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->unique()->constrained()->cascadeOnDelete();
@@ -156,11 +152,6 @@ return new class extends Migration
         Schema::dropIfExists('order_items');
         Schema::dropIfExists('order_addresses');
         Schema::dropIfExists('order_contacts');
-
-        Schema::table('inventory_movements', function (Blueprint $table) {
-            $table->dropForeign(['order_id']);
-        });
-
         Schema::dropIfExists('orders');
     }
 };

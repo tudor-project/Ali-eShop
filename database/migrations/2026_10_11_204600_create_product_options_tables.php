@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('product_option_groups', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('info_popup_id')->nullable()->constrained('info_popups')->nullOnDelete();
             $table->string('code');
             $table->unsignedTinyInteger('min_selections')->default(0);
             $table->unsignedTinyInteger('max_selections')->default(1);

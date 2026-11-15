@@ -18,24 +18,8 @@
     $hasOptionInfo = $optionGroups->contains(function ($group): bool {
         $translation = $group->infoPopup?->translations->first();
 
-        return filled($translation?->title) || filled($translation?->body);
+        return filled($translation?->title) || $translation?->hasBlocks();
     });
-
-    $videoEmbed = function (?string $url): ?string {
-        if ($url === null || ! preg_match('#^https?://#i', $url)) {
-            return null;
-        }
-
-        if (preg_match('~(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([\w-]{11})~', $url, $matches)) {
-            return 'https://www.youtube.com/embed/'.$matches[1];
-        }
-
-        if (preg_match('~vimeo\.com/(?:video/)?(\d+)~', $url, $matches)) {
-            return 'https://player.vimeo.com/video/'.$matches[1];
-        }
-
-        return null;
-    };
 @endphp
 
 <x-shop.layout
@@ -136,7 +120,9 @@
                             <p class="text-sm text-neutral-700">{{ __('shop.products.required_hint') }}</p>
                         @endif
                         @if ($hasOptionInfo)
-                            <p @class(['text-sm text-neutral-600', 'mt-1' => $hasRequiredOption])>{{ __('shop.products.option_info_hint') }}</p>
+                            <p @class(['text-sm text-neutral-600', 'mt-1' => $hasRequiredOption])>{{ __('shop.products.option_info_hint') }}
+                                <span class="inline-flex size-4 items-center justify-center rounded-full bg-teal-700 text-[11px] font-semibold text-white" aria-hidden="true">i</span>
+                            </p>
                         @endif
 
                         <div @class(['rounded-lg bg-neutral-100 px-4 sm:px-5', 'mt-4' => $hasRequiredOption || $hasOptionInfo])>
@@ -144,20 +130,20 @@
                                 @php
                                     $optionName = $group->translations->first()?->name;
                                     $popupTranslation = $group->infoPopup?->translations->first();
-                                    $showInfo = filled($popupTranslation?->title) || filled($popupTranslation?->body);
+                                    $showInfo = filled($popupTranslation?->title) || $popupTranslation?->hasBlocks();
                                 @endphp
                                 <div class="flex flex-col gap-2 border-b border-neutral-200/80 py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                                     <div class="flex min-w-0 items-center gap-1">
                                         @if ($showInfo)
                                             <button
                                                 type="button"
-                                                class="inline-flex size-11 shrink-0 items-center justify-center"
+                                                class="inline-flex size-11 shrink-0 items-center justify-center cursor-pointer"
                                                 x-on:click="info = {{ $group->id }}"
                                                 aria-haspopup="dialog"
                                                 x-bind:aria-expanded="(info === {{ $group->id }}).toString()"
                                                 aria-label="{{ __('shop.products.option_info', ['option' => $optionName]) }}"
                                             >
-                                                <span class="inline-flex size-5 items-center justify-center rounded-full bg-teal-700 text-[11px] font-semibold text-white" aria-hidden="true">i</span>
+                                                <span class="inline-flex size-4 items-center justify-center rounded-full bg-teal-700 text-[11px] font-semibold text-white" aria-hidden="true">i</span>
                                             </button>
                                         @endif
                                         <span class="text-sm whitespace-nowrap">
@@ -179,21 +165,21 @@
                         </div>
                         <button
                             type="button"
-                            class="mt-3 inline-flex h-11 items-center text-xs tracking-[0.14em] text-neutral-500 uppercase"
+                            class="mt-3 inline-flex h-11 items-center text-xs tracking-[0.14em] text-neutral-500 uppercase cursor-pointer"
                             x-on:click="$root.querySelectorAll('select').forEach((select) => { select.value = '' })"
                         >
                             {{ __('shop.products.clear') }}
                         </button>
 
                         <div
-                            class="fixed inset-0 z-50 bg-white md:flex md:items-center md:justify-center md:bg-black/40 md:p-6"
+                            class="fixed inset-0 z-50 bg-white md:flex md:items-center md:justify-center md:bg-black/40 md:p-6" ////
                             x-cloak
                             x-show="info !== null"
                             x-on:click.self="info = null"
                             x-on:keydown.escape.window="info = null"
                         >
                             <div
-                                class="flex h-full w-full flex-col bg-white md:h-auto md:max-h-[80vh] md:max-w-lg"
+                                class="flex h-full w-full flex-col bg-white md:h-auto md:max-h-[95vh] md:max-w-[50rem]"
                                 role="dialog"
                                 aria-modal="true"
                                 x-bind:aria-labelledby="info ? 'option-info-title-' + info : null"
@@ -201,7 +187,7 @@
                                 <div class="flex justify-end">
                                     <button type="button" class="inline-flex size-11 items-center justify-center" x-on:click="info = null">
                                         <span class="sr-only">{{ __('shop.nav.close') }}</span>
-                                        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" class="size-5 cursor-pointer" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                                             <path d="M6 6l12 12M18 6 6 18" />
                                         </svg>
                                     </button>
@@ -209,33 +195,15 @@
                                 <div class="overflow-y-auto px-6 pb-8">
                                     @foreach ($optionGroups as $group)
                                         @php
-                                            $popup = $group->infoPopup;
-                                            $popupTranslation = $popup?->translations->first();
+                                            $popupTranslation = $group->infoPopup?->translations->first();
                                         @endphp
-                                        @continue(! filled($popupTranslation?->title) && ! filled($popupTranslation?->body))
-                                        <div x-show="info === {{ $group->id }}">
-                                            <h2 id="option-info-title-{{ $group->id }}" class="text-lg font-medium">{{ $popupTranslation->title }}</h2>
-                                            @if (filled($popupTranslation->body))
-                                                <div class="mt-4 text-sm leading-7 whitespace-pre-line text-neutral-600">{{ $popupTranslation->body }}</div>
-                                            @endif
-                                            @php
-                                                $embedUrl = $videoEmbed($popup->video_url);
-                                                $fileUrl = $embedUrl === null && is_string($popup->video_url) && preg_match('#^https?://#i', $popup->video_url)
-                                                    ? $popup->video_url
-                                                    : null;
-                                            @endphp
-                                            @if ($embedUrl || $fileUrl)
-                                                <template x-if="info === {{ $group->id }}">
-                                                    <div class="mt-6">
-                                                        @if ($embedUrl)
-                                                            <iframe class="aspect-video w-full" src="{{ $embedUrl }}" title="{{ $popupTranslation->title }}" allowfullscreen></iframe>
-                                                        @else
-                                                            <video class="w-full" controls playsinline src="{{ $fileUrl }}"></video>
-                                                        @endif
-                                                    </div>
-                                                </template>
-                                            @endif
-                                        </div>
+                                        @continue(! filled($popupTranslation?->title) && ! $popupTranslation?->hasBlocks())
+                                        <template x-if="info === {{ $group->id }}">
+                                            <div>
+                                                <h2 id="option-info-title-{{ $group->id }}" class="text-lg font-medium">{{ $popupTranslation->title }}</h2>
+                                                <x-shop.info-popup-content :blocks="$popupTranslation->content ?? []" :title="$popupTranslation->title" />
+                                            </div>
+                                        </template>
                                     @endforeach
                                 </div>
                             </div>

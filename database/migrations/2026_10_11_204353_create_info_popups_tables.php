@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('info_popups', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
-            $table->string('video_url')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -24,7 +23,7 @@ return new class extends Migration
             $table->foreignId('info_popup_id')->constrained()->cascadeOnDelete();
             $table->string('locale', 5);
             $table->string('title');
-            $table->text('body');
+            $table->json('content')->nullable();
             $table->timestamps();
 
             $table->unique(['info_popup_id', 'locale']);

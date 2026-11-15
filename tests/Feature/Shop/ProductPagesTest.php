@@ -15,6 +15,7 @@ use App\Models\ProductOptionValueTranslation;
 use App\Models\ProductTranslation;
 use App\Models\ProductVariant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ProductPagesTest extends TestCase
@@ -96,11 +97,47 @@ class ProductPagesTest extends TestCase
         $product->categories()->attach($category->id, ['sort_order' => 1]);
 
         $popup = InfoPopup::query()->create(['key' => 'size-help', 'is_active' => true]);
-        InfoPopupTranslation::query()->create([
+        $popupTranslation = InfoPopupTranslation::query()->create([
             'info_popup_id' => $popup->id,
             'locale' => 'ro',
             'title' => 'Despre mărime',
-            'body' => 'Alege mărimea ramei.',
+            'content' => [],
+        ]);
+        DB::table('info_popup_translations')->where('id', $popupTranslation->id)->update([
+            'content' => json_encode([
+                [
+                    'type' => 'paragraph',
+                    'data' => ['text' => '<p>Alege <strong>mărimea</strong> ramei.</p><script>alert(1)</script><img src="data:image/png;base64,aaaa">'],
+                ],
+                [
+                    'type' => 'image',
+                    'data' => ['path' => 'data:image/png;base64,aaaa', 'alt' => 'Cadru'],
+                ],
+                [
+                    'type' => 'image',
+                    'data' => ['path' => 'info-popups/cadru.webp', 'alt' => 'Rama oglinzii'],
+                ],
+                [
+                    'type' => 'video',
+                    'data' => ['url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
+                ],
+                [
+                    'type' => 'video',
+                    'data' => ['url' => '<iframe src="https://evil.test/embed"></iframe>'],
+                ],
+                [
+                    'type' => 'local_video',
+                    'data' => ['path' => 'info-popups/montaj.webm'],
+                ],
+                [
+                    'type' => 'local_video',
+                    'data' => ['path' => 'info-popups/../secret.mp4'],
+                ],
+                [
+                    'type' => 'list',
+                    'data' => ['style' => 'unordered', 'items' => ['Primul pas<script>']],
+                ],
+            ], JSON_UNESCAPED_UNICODE),
         ]);
 
         $group = ProductOptionGroup::query()->create([
@@ -139,7 +176,21 @@ class ProductPagesTest extends TestCase
             ->assertSee('Mare')
             ->assertSee('Pentru mai multe informații, apasă simbolul i.')
             ->assertSee('Despre mărime')
-            ->assertSee('Alege mărimea ramei.')
+            ->assertSee('Alege')
+            ->assertSee('mărimea')
+            ->assertSee('<strong>', false)
+            ->assertSee('Primul pas', false)
+            ->assertSee('<ul', false)
+            ->assertSee('Rama oglinzii', false)
+            ->assertSee('info-popups/cadru.webp', false)
+            ->assertSee('https://www.youtube.com/embed/dQw4w9WgXcQ', false)
+            ->assertSee('info-popups/montaj.webm', false)
+            ->assertSee('<video', false)
+            ->assertSee('preload="none"', false)
+            ->assertDontSee('secret.mp4', false)
+            ->assertDontSee('alert(1)', false)
+            ->assertDontSee('data:image', false)
+            ->assertDontSee('evil.test', false)
             ->assertSee('MIRROR-oglinda-rotunda')
             ->assertSee('Perete');
 

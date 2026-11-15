@@ -42,7 +42,7 @@ return [
         'view' => 'Vezi produsul',
         'wishlist' => 'Favorite',
         'option_info' => 'Informații despre :option',
-        'option_info_hint' => 'Pentru mai multe informații, apasă simbolul i.',
+        'option_info_hint' => 'Pentru mai multe informații, apasă simbolul ',
         'required' => 'Obligatoriu',
         'required_hint' => 'Câmpurile marcate cu * sunt obligatorii.',
         'out_of_stock' => 'Stoc epuizat',

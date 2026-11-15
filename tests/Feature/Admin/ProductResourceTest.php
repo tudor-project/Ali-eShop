@@ -41,7 +41,12 @@ class ProductResourceTest extends TestCase
             'info_popup_id' => $popup->id,
             'locale' => 'ru',
             'title' => 'Установка',
-            'body' => 'Как установить зеркало.',
+            'content' => [
+                [
+                    'type' => 'paragraph',
+                    'data' => ['text' => '<p>Как установить зеркало.</p>'],
+                ],
+            ],
         ]);
 
         Livewire::test(CreateProduct::class)
